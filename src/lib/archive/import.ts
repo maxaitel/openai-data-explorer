@@ -1,7 +1,6 @@
 import { BlobReader, ZipReader, configure, type Entry } from '@zip.js/zip.js'
 import { addJSON, makeArchive, type ArchiveRecord } from './model'
 configure({useWebWorkers:false}) // Already inside our dedicated archive worker.
-export const MAX_FILE = 1024 * 1024 * 1024
 const MAX_JSON = 128 * 1024 * 1024
 const MAX_INDEX = 384 * 1024 * 1024
 const mimeFor=(name:string)=>({json:'application/json',txt:'text/plain',md:'text/plain',csv:'text/csv',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',mp3:'audio/mpeg',wav:'audio/wav',ogg:'audio/ogg',mp4:'video/mp4',webm:'video/webm',pdf:'application/pdf'}[name.split('.').at(-1)?.toLowerCase()||'']||'application/octet-stream')
@@ -14,7 +13,6 @@ export async function entryBlob(entry: Entry, max: number, mime: string) {
   return new Blob(parts,{type:mime})
 }
 export async function importFile(file:File, progress:(value:number,label:string)=>void) {
-  if(file.size>MAX_FILE) throw new Error('Choose a ZIP under 1 GB, or upload conversations.json directly (up to 128 MB).')
   const records:ArchiveRecord[]=[]
   const warnings:string[]=[]
   if(file.name.toLowerCase().endsWith('.json')) {
