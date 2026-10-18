@@ -42,9 +42,9 @@ export function normalize(raw: Raw, kind: string, id: string, source: string): A
   const projection = obj(raw.projection)
   const title = String(raw.title || projection.title || projection.name || (['conversations','codex'].includes(kind) ? 'Untitled' : source))
   const text = kind === 'pages' ? String(projection.materialized_search_text || content(projection)) : messages.length ? '' : content(raw)
-  return { id, kind, title, model: String(raw.default_model_slug || ''), updated: stamp(raw.update_time || raw.updated_at || raw.create_time), created: stamp(raw.create_time), count: messages.length || Object.keys(raw).length, source, raw, text, messages, search: `${title}\n${messages.map(m=>m.text).join('\n')}\n${text || JSON.stringify(raw)}`.toLowerCase() }
+  return { id, kind, title, model: String(raw.default_model_slug || ''), updated: stamp(raw.update_time || raw.updated_at || raw.create_time), created: stamp(raw.create_time), count: messages.length || Object.keys(raw).length, source, raw, text, messages, search: `${title}\n${messages.map(m=>m.text).join('\n')}\n${text || (messages.length ? '' : JSON.stringify(raw))}`.toLowerCase() }
 }
-export function addJSON(records: ArchiveRecord[], name: string, value: unknown) {
+export function addJSON(records: ArchiveRecord[], name: string, value: unknown, offset = 0) {
   const base = name.split('/').at(-1) || name
   if (/^(conversations|codex)(-\d+)?\.json$/i.test(base)) {
     const rows = Array.isArray(value) ? value : list(obj(value).conversations)
@@ -52,7 +52,7 @@ export function addJSON(records: ArchiveRecord[], name: string, value: unknown) 
     const kind = base.startsWith('codex') ? 'codex' : 'conversations'
     for (const [i, record] of rows.entries()) {
       if (!record || typeof record !== 'object' || (!record.mapping && !record.turns)) continue
-      records.push(normalize(record, kind, `${kind}:${record.id || record.conversation_id || `${name}-${i}`}`, name))
+      records.push(normalize(record, kind, `${kind}:${record.id || record.conversation_id || `${name}-${i + offset}`}`, name))
     }
   } else {
     const kind = /pages\/.*\/content\/current\.json$/.test(name) ? 'pages' : name.startsWith('sites/') ? 'sites' : !name.includes('/') ? 'account' : 'other'

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
+    "@streamparser/json": "^0.0.26",
     "@tailwindcss/vite": "^4.3.3",
     "@zip.js/zip.js": "^2.24.0",
     "class-variance-authority": "^0.7.1",

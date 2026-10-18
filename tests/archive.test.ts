@@ -11,3 +11,21 @@ test('demo is deterministic, contains both sources and has consistent totals',()
 test('JSON import accepts standard exports, rejects unrelated and malformed JSON',async()=>{const ok=await importFile(new File([JSON.stringify([conversation])],'conversations.json'),()=>{});assert.equal(ok.archive.records.length,1);await assert.rejects(importFile(new File(['{}'],'unrelated.json'),()=>{}),/No conversations/);await assert.rejects(importFile(new File(['{'],'broken.json'),()=>{}));await assert.rejects(importFile(new File(['a'],'archive.txt'),()=>{}),/\.zip or .json/)})
 test('ZIP folder prefix, file access and missing privacy records',async()=>{const writer=new ZipWriter(new BlobWriter());await writer.add('export/conversations.json',new TextReader(JSON.stringify([conversation])));await writer.add('export/notes.txt',new TextReader('Fictional notes'));const blob=await writer.close();const result=await importFile(new File([blob],'export.zip'),()=>{});assert.equal(result.archive.records[0].title,'Learn physics');assert.equal(await (await result.getFile('notes.txt')).text(),'Fictional notes');assert.equal(result.archive.files.length,2)})
 test('empty source has all-time period and safe zero metrics',()=>{const empty=buildInsights([],'codex');assert.equal(empty.periods.all.messages,0);assert.equal(empty.periods.all.first,0);assert.equal(empty.periods.all.peakHour,null);assert.deepEqual(empty.years,[])})
+
+test('streamed JSON handles wrapped arrays, UTF-8 boundaries and missing IDs',async()=>{
+  const { jsonSink } = await import('../src/lib/archive/json-stream')
+  for(const wrap of [false,true]) {
+    const records:ArchiveRecord[]=[]
+    const rows=[{title:'🌱 "quoted" \\ path',mapping:{}},{title:'Second',mapping:{}}]
+    const data=new TextEncoder().encode(JSON.stringify(wrap?{conversations:rows}:rows))
+    const writer=jsonSink(records,'conversations.json').getWriter()
+    for(let i=0;i<data.length;i+=3)await writer.write(data.slice(i,i+3))
+    await writer.close()
+    assert.equal(records.length,2)
+    assert.equal(records[0].title,rows[0].title)
+    assert.notEqual(records[0].id,records[1].id)
+  }
+})
+test('streamed import rejects truncated JSON rather than accepting partial records',async()=>{
+  await assert.rejects(importFile(new File(['[{"id":"one","mapping":{}},'],'conversations.json'),()=>{}))
+})
