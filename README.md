@@ -1,5 +1,7 @@
 # OpenAI Data Explorer
 
+The interface uses Bencho MCP's animated Tab bar for data-source selection and Seek for archive search, adapted into controlled React components. See `design/VERIFICATION.md` for the redesign, component provenance, and verification details.
+
 Local ChatGPT export explorer and usage recap. React, TypeScript, Vite, shadcn/ui, Recharts, and a Python/SQLite API.
 
 ## Run
