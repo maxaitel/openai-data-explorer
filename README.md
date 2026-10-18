@@ -15,7 +15,7 @@ Open http://127.0.0.1:5173. No server, account or API key is required. `npm run 
 
 ## Import and privacy
 
-Exports are parsed in a browser Web Worker. Archive contents are never sent to the host. Fonts and scripts are bundled locally. “Keep on this device” stores the original file in IndexedDB so it can reopen after a reload. Remove saved archive clears that copy. Browser storage limits vary; if saving fails, the archive remains available for the current visit. Demo mode uses synthetic data and does not replace a saved export.
+Exports are parsed in a browser Web Worker. Archive contents are never sent to the host. Fonts and scripts are bundled locally. The app automatically stores the original file in IndexedDB so it can reopen after a reload. Remove saved archive clears that copy. Browser storage limits vary; if saving fails, the archive remains available for the current visit. Demo mode uses synthetic data and does not replace a saved export.
 
 Supported imports: export ZIPs and conversation JSON files. Limits: 1 GB compressed ZIP, 50,000 entries, 128 MB per JSON or attachment preview, 384 MB total JSON. Very large exports may exceed device memory. HTML and other active archive documents are downloaded, never executed by the explorer.
 
