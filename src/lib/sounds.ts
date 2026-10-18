@@ -13,7 +13,7 @@ const tones: Record<Cue, [number, number, number, number]> = {
   scroll: [260, 230, .025, .008],
 }
 let context: AudioContext | undefined
-let lastPlayed = 0
+let lastPlayed = -Infinity
 let soundEnabled = true
 let lastChartNote = -1
 const chartScale = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 783.99]
@@ -84,12 +84,15 @@ export function soundChart(ratio: number, unlock = false) {
   } catch { /* Charts remain usable when browser audio is unavailable. */ }
 }
 
+/** Call synchronously from a user click, before opening a picker or starting work. */
+export const unlockSounds = () => play('press', true)
+
 export const soundFeedback = (cue: 'upload' | 'success' | 'error') => play(cue, true)
 
 const interactive = 'button, a[href], summary, input, select, textarea, [role="button"], [role="tab"], [role="option"], [role="combobox"], [role="menuitem"]'
 function control(target: EventTarget | null) {
   const element = target instanceof Element ? target.closest(interactive) : null
-  return element && !element.matches(':disabled, [aria-disabled="true"]') && !element.closest('[data-sound-toggle], [data-chart-sound]') ? element : null
+  return element && !element.matches(':disabled, [aria-disabled="true"]') && !element.closest('[data-sound-toggle], [data-chart-sound], [data-sound-activation]') ? element : null
 }
 
 export function useInteractionSounds() {
