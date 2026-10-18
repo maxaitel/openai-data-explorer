@@ -89,7 +89,7 @@ button, input {
 .sidebar-footer [data-slot=separator] {
   background: #343b40;
 }
-.sidebar-footer > div:last-child {
+.sidebar-footer > .archive-summary {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -617,7 +617,7 @@ h1 {
 .main-content {
   margin-left: 68px;
 }
-.sidebar-footer > div:last-child {
+.sidebar-footer > .archive-summary {
   padding-inline: 14px;
 }
 .overview-header {
