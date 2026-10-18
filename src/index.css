@@ -5,6 +5,7 @@
 @import "./components/bencho/bencho.css";
 @import "./components/bencho/seek.css";
 @import "./workspace.css";
+@import "./dark.css";
 
 @custom-variant dark (&:is(.dark *));
 

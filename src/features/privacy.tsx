@@ -41,12 +41,12 @@ export function Privacy({ onSource, archiveName }: { onSource: (id: string, kind
   const ads = useApi<{ raw: Ads }>('/api/record?id=ads.json')
   const settings = useApi<{ raw: AccountSettings[] }>('/api/record?id=user_settings.json')
   const feedback = useApi<{ raw: unknown[] }>('/api/record?id=message_feedback.json')
-  const error = deeper.error || ads.error || settings.error || feedback.error
+  const error = deeper.error
   if (error) return <div className="overview"><Failure message={error} /></div>
-  if (!deeper.data || !ads.data || !settings.data || !feedback.data) return <div className="overview"><Loading /></div>
+  if (!deeper.data || (!ads.data && !ads.error) || (!settings.data && !settings.error) || (!feedback.data && !feedback.error)) return <div className="overview"><Loading /></div>
   const deep = deeper.data
-  const a = ads.data.raw
-  const account = settings.data.raw[0] || {}
+  const a = ads.data?.raw || {}
+  const account = settings.data?.raw?.[0] || {}
   const s = account.settings || {}
   const announcements = account.announcements || {}
   const interests = [...new Set((a.ads_profile || []).flatMap(p => p.inferred_profile?.user_interests?.map(i => i.interest) || []))]
@@ -56,7 +56,7 @@ export function Privacy({ onSource, archiveName }: { onSource: (id: string, kind
   const source = (file: string) => <Button variant="outline" size="sm" onClick={() => onSource(file)}>View {file}</Button>
   return <div className="overview privacy-page">
     <header><h1>Privacy</h1><p className="mt-2 text-sm text-muted-foreground">Export snapshot{snapshot ? ` · ${snapshot}` : ''} · Saved values, not live settings</p></header>
-    <div className="privacy-grid">
+    {(ads.error || settings.error || feedback.error) && <p className="archive-note">Some privacy files are not included in this export. Missing fields are shown as not recorded; absence does not mean a setting is off.</p>}<div className="privacy-grid">
       <section className="insight-section" aria-labelledby="ad-profile-title">
         <h2 id="ad-profile-title">Inferred ad profile</h2>
         <p className="metric-note">Interests assigned to your account</p>
@@ -120,7 +120,7 @@ export function Privacy({ onSource, archiveName }: { onSource: (id: string, kind
     </div>
     <section className="insight-section" aria-labelledby="feedback-title">
       <h2 id="feedback-title">Feedback & training</h2>
-      <p className="mt-3">{feedback.data.raw.length} saved feedback records</p>
+      <p className="mt-3">{feedback.data?.raw?.length ?? 'No'} saved feedback records</p>
       <p className="privacy-note">OpenAI says conversations submitted with thumbs-up/down feedback may be used for model improvement even after opting out. These records do not show whether that happened.</p>
       <div className="flex flex-wrap items-center gap-3">{source('message_feedback.json')}<a className="privacy-link" href="https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance" target="_blank" rel="noreferrer">Feedback policy ↗</a></div>
     </section>

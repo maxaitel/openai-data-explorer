@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react'
+import { archiveQuery } from './archive/client'
 export function useApi<T>(url: string) {
   const [state, setState] = useState<{ url: string; data?: T; error?: string }>({ url: '' })
   useEffect(() => {
-    const controller = new AbortController()
-    fetch(url, { signal: controller.signal }).then(async response => {
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Could not load data')
-      setState({ url, data })
-    }).catch(error => {
-      if (error.name !== 'AbortError') setState({ url, error: error.message })
-    })
-    return () => controller.abort()
+    let active = true
+    archiveQuery<T>(url).then(data => { if (active) setState({ url, data }) }).catch(error => { if (active) setState({ url, error: error.message }) })
+    return () => { active = false }
   }, [url])
   return state.url === url ? state : { url }
 }
